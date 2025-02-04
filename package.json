@@ -1,6 +1,6 @@
 {
-  "name": "wrappid-module",
-  "version": "0.0.6",
+  "name": "webscraper-module",
+  "version": "0.0.1",
   "description": "This is a template repository for a wrappid module.",
   "main": "index.js",
   "scripts": {
@@ -17,14 +17,14 @@
   },
   "license": "MIT",
   "author": {
-    "name": "Wrappid",
-    "email": "wrappid.framework@gmail.com",
-    "url": "https://www.github.com/wrappid"
+    "name": "wrappid",
+    "email": "antaghosh@gmail.com",
+    "url": "https://github.com/wrappid"
   },
-  "homepage": "https://github.com/wrappid/wrappid-module",
+  "homepage": "https://github.com/wrappid/webscraper",
   "repository": {
     "type": "git",
-    "url": "git:https://github.com/wrappid/wrappid-module.git"
+    "url": "git+https://github.com/wrappid/webscraper-module.git"
   },
   "keywords": [
     "wrappid",
