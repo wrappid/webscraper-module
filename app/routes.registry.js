@@ -1,8 +1,10 @@
+import { AppContainerLayout } from "@wrappid/core"
+
 export const RoutesRegistry = {
-  defaultModuleRoute: {
-    Page        : { appComponent: "ModuleComponent" },
-    authRequired: false,
-    entityRef   : "wrappid",
-    url         : "wrappid"
+  WebScrapper: {
+    Page        : { appComponent: "WebScrapper", layout: AppContainerLayout.name },
+    authRequired: true,
+    entityRef   : "webscrapper",
+    url         : "webscrapper"
   },
 };

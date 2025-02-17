@@ -1,3 +1,5 @@
-import testReducer from "./reducers/test.reducer";
+import webScrapperReducer from "./reducers/webScrapperReducer";
 
-export const ReducersRegistry = { "test": testReducer };
+export const ReducersRegistry = { 
+    webScrapperReducer: webScrapperReducer
+ };

@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+      "jsx": "react",  // Use classic React JSX transform (React 16-style)
+      "target": "es2016", // or "es6" depending on your needs
+      "lib": ["dom", "esnext"],
+      "allowJs": true,
+      "checkJs": false,
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+      "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+      "resolveJsonModule": true,
+      "isolatedModules": true,
+      "noEmit": false, 
+      "removeComments": true,
+      "skipLibCheck": true,
+      "outDir": "./dist",
+      "allowSyntheticDefaultImports":true,
+      "allowImportingTsExtensions":true,          /* Allow importing .ts files even when --allowJs is specified. */ 
+    },
+    "include": ["app/**/*.tsx","app/**/*.ts","app/**/*.js", "app/**/*.jsx"], // Include all .tsx files for conversion
+    "exclude": ["node_modules"]
+  }
