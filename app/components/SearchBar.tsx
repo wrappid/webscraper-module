@@ -46,7 +46,7 @@ const SearchBar = () => {
           styleClasses={[
             CoreClasses.PADDING.P1,
             CoreClasses.BORDER.BORDER,
-            CoreClasses.BORDER_COLOR_GREY_300,
+            CoreClasses.BORDER.BORDER_COLOR_GREY_300,
             CoreClasses.WIDTH.W_75
           ]}
         />
