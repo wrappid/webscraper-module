@@ -1,6 +1,6 @@
 // components/SearchBar.tsx
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { 
   CoreInput, 
   CoreBox, 
@@ -8,9 +8,11 @@ import {
   CoreButton, 
   CoreGrid 
 } from "@wrappid/core";
-import { setUrl } from "../actions/webScrapperAction";
+import { resetScraper, setUrl } from "../actions/webScrapperAction";
 
+// will move to CoreForm?
 const SearchBar = () => {
+  const {url} = useSelector((state: any) => state.webScrapperReducer);
   const dispatch = useDispatch();
   const [inputUrl, setInputUrl] = useState("");
 
@@ -20,8 +22,17 @@ const SearchBar = () => {
 
   const handleSearch = () => {
     if (inputUrl.trim()) {
-        // @ts-ignore
-      dispatch(setUrl(inputUrl.trim()));
+      const cleanedInputUrl = inputUrl.trim();
+      if(url !== cleanedInputUrl) {
+      dispatch(resetScraper());
+      dispatch(setUrl(cleanedInputUrl));
+      }else{
+        // remove and show message via CoreDialog or CoreAlert, or maybe at helper area
+        alert("URL already set");
+      }
+    }else {
+      // same as above
+      alert("Please enter a URL to scrape");
     }
   };
 

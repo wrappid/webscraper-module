@@ -6,15 +6,11 @@ import {
     SAVE_FETCH_FAILURE,
     PROCESS_DATA_SUCCESS,
     WebScraperState,
-    ScraperConfiguration
+    // ScraperConfiguration
 } from '../types/webscraper.types';
 
-const defaultConfig: ScraperConfiguration = {
-    targetAttributes: ['id', 'class', 'data-testid']
-};
-
 const initialState: WebScraperState = {
-    data: null,
+    data: {},
     url: "",
     error: false,
     message: "Enter a URL to start scraping",
@@ -27,10 +23,11 @@ const webScrapperReducer = (state = initialState, action: any): WebScraperState 
         case SAVE_FETCH_SUCCESS:
             return {
                 ...state,
-                loading: true,
+                data: { ...(state?.data || {}), rawData: action.payload?.contents || "Data not found" },
+                loading: false,
                 error: false,
-                success: false,
-                message: "Processing data..."
+                success: true,
+                message: "Data fetched successfully"
             };
 
         case PROCESS_DATA_SUCCESS:
@@ -40,7 +37,7 @@ const webScrapperReducer = (state = initialState, action: any): WebScraperState 
                 loading: false,
                 error: false,
                 success: true,
-                message: "Data fetched successfully"
+                message: "Processed data successfully"
             };
 
         case SAVE_FETCH_FAILURE:
@@ -48,7 +45,9 @@ const webScrapperReducer = (state = initialState, action: any): WebScraperState 
                 ...state,
                 error: true,
                 success: false,
-                message: "Failed to fetch data",
+                message: typeof action.payload === 'string'
+                    ? action.payload
+                    : action.payload?.message || "Failed to fetch data",
                 data: null,
                 loading: false
             };
@@ -56,7 +55,9 @@ const webScrapperReducer = (state = initialState, action: any): WebScraperState 
         case SET_SCRAPER_URL:
             return {
                 ...state,
-                url: action.payload
+                url: action.payload,
+                loading: true,
+                message: "Fetching data..."
             };
 
         case RESET_SCRAPER:

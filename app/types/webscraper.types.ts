@@ -26,7 +26,7 @@ export interface WebScraperState {
   error: boolean;
   message: string;
   success: boolean;
-  data: ScraperResult | null;
+  data: ScraperResult | null | {};
   url: string;
   loading: boolean;
 }

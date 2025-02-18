@@ -1,64 +1,88 @@
 // components/WebScraper.tsx
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { 
-  AppContainerLayout, 
-  CoreLayoutItem, 
-  CoreBox, 
-  CoreClasses, 
-  CoreGrid 
+import {
+  AppContainerLayout,
+  CoreLayoutItem,
+  CoreBox,
+  CoreClasses,
+  CoreGrid,
+  CoreJSONEditor,
+  CoreButton
 } from "@wrappid/core";
 import SearchBar from "./SearchBar";
 import SmartView from "./SmartView";
 import RawView from "./RawView";
-import { fetchScraperData, resetScraper } from "../actions/webScrapperAction";
+import { fetchScraperData, processData, resetScraper } from "../actions/webScrapperAction";
 // import { WebScraperState } from "../types/webscraper.types";
 
 const WebScraper = () => {
   const dispatch = useDispatch();
-//   const [stateUrl, setStateUrl] = React.useState("");
+  const [targetAttributes, setTargetAttributes] = useState(['id']);
 
-//   useEffect(() => {
-//     // Reset state on page load / refresh
-//     dispatch(resetScraper());
-//   }, [dispatch]);
   const { url, data: webScrapperData } = useSelector(
     (state: any) => state.webScrapperReducer || {}
   );
+  console.log("Received url from state: ", url);
 
-console.log("Received url from state: ", url);
+  const handleTargetAttributesChange = (newValue:any) => {
+    setTargetAttributes(newValue);
+  };
 
   useEffect(() => {
     if (url) {
-        console.log("I'm in dispatch");
-        
-      dispatch(fetchScraperData(url, { targetAttributes: ["id"] } ) as any);
+      console.log("I'm in dispatch");
+      dispatch(fetchScraperData(url) as any);
     }
   }, [url]);
 
+  const handleProcessData = () => {
+    if (webScrapperData?.rawData) {
+      dispatch(processData(webScrapperData.rawData, { targetAttributes }) as any);
+    }
+  };
+
   return (
     <>
-    <CoreLayoutItem id={AppContainerLayout.PLACEHOLDER.CONTENT}>
-      <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_COLUMN]}>
-        <SearchBar />
-        {webScrapperData && (
-          <CoreGrid>
-            <CoreBox 
-              gridProps={{ gridSize: {md: 6} }} 
-              styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
-            >
-              <SmartView IDs={webScrapperData.processedData} />
-            </CoreBox>
-            <CoreBox 
-              gridProps={{ gridSize: {md: 6} }} 
-              styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
-            >
-              <RawView rawData={JSON.stringify(webScrapperData.rawData, null, 2)} />
-            </CoreBox>
-          </CoreGrid>
-        )}
-      </CoreBox>
-    </CoreLayoutItem>
+      <CoreLayoutItem id={AppContainerLayout.PLACEHOLDER.CONTENT}>
+        <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_COLUMN]}>
+          <SearchBar />
+          {webScrapperData && (
+            
+            <CoreGrid>
+              
+              <CoreBox gridProps={{ gridSize: { md: 9 } }} styleClasses={[CoreClasses.PADDING.P2]}>
+              <CoreJSONEditor
+                value={targetAttributes}
+                label="Target Attributes (JSON array)"
+                onChange={handleTargetAttributesChange}
+              />
+              <CoreButton 
+                onClick={handleProcessData}
+                styleClasses={[CoreClasses.MARGIN.MT2]}
+              >
+                Process Data
+              </CoreButton>
+                </CoreBox>
+              <CoreBox
+                gridProps={{ gridSize: { md: 6 } }}
+                styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
+              >
+                <RawView rawData={JSON.stringify(webScrapperData.rawData, null, 2)} />
+              </CoreBox>
+
+              {webScrapperData?.processedData && (
+                <CoreBox
+                  gridProps={{ gridSize: { md: 6 } }}
+                  styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
+                >
+                  <SmartView IDs={webScrapperData.processedData} />
+                </CoreBox>
+              )}
+            </CoreGrid>
+          )}
+        </CoreBox>
+      </CoreLayoutItem>
     </>
   );
 };

@@ -4,7 +4,7 @@ import { ScraperFactory } from './ScraperFactory';
 
 export class ScraperService {
     private static instance: ScraperService;
-    private observers: ((result: ScraperResult) => void)[] = [];
+    // private observers: ((result: ScraperResult) => void)[] = [];
 
     private constructor() { }
 
@@ -15,15 +15,15 @@ export class ScraperService {
         return ScraperService.instance;
     }
 
-    public subscribe(observer: (result: ScraperResult) => void): void {
-        this.observers.push(observer);
-    }
+    // public subscribe(observer: (result: ScraperResult) => void): void {
+    //     this.observers.push(observer);
+    // }
 
-    public unsubscribe(observer: (result: ScraperResult) => void): void {
-        this.observers = this.observers.filter(obs => obs !== observer);
-    }
+    // public unsubscribe(observer: (result: ScraperResult) => void): void {
+    //     this.observers = this.observers.filter(obs => obs !== observer);
+    // }
 
-    public async processScrapeData(htmlData: string, config: ScraperConfiguration): Promise<ScraperResult> {
+    public processScrapeData(htmlData: string, config: ScraperConfiguration): ScraperResult {
         const scraper = ScraperFactory.createScraper(config);
         const processedData = scraper.processHtmlResponse(htmlData);
 
@@ -32,11 +32,11 @@ export class ScraperService {
             processedData
         };
 
-        this.notifyObservers(result);
+        // this.notifyObservers(result);
         return result;
     }
 
-    private notifyObservers(result: ScraperResult): void {
-        this.observers.forEach(observer => observer(result));
-    }
+    // private notifyObservers(result: ScraperResult): void {
+    //     this.observers.forEach(observer => observer(result));
+    // }
 }
