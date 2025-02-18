@@ -12,7 +12,7 @@ export interface TargetAttribute {
 
 export interface ScraperConfiguration {
   attributes: TargetAttribute[]; // Array of target attributes
-  combination?: string[]; // Array of attribute names to combine
+  filter?: string[]; // Array of attribute names to combine
 }
 
 export interface WebScraperState {

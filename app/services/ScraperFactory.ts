@@ -17,7 +17,7 @@ export class DOMScraper implements Scraper {
     public processHtmlResponse(htmlData: string): ScrapedElement[] {
         const doc = this.parser.parseFromString(htmlData, "text/html");
         const extractedElements: ScrapedElement[] = [];
-    
+
         // Handle individual attributes
         this.configuration.attributes.forEach(({ name, value }) => {
             const elements = doc.querySelectorAll(`[${name}]`);
@@ -28,20 +28,20 @@ export class DOMScraper implements Scraper {
                 }
             });
         });
-    
-        // Handle combinations of attributes
-        if (this.configuration.combination.length > 0) {
-            const combinationSelector = this.configuration.combination.map(attr => `[${attr}]`).join('');
-            const combinedElements = doc.querySelectorAll(`div${combinationSelector}`);
+
+        // Handle filters of attributes
+        if (this.configuration.filter.length > 0) {
+            const filterSelector = this.configuration.filter.map(attr => `[${attr}]`).join('');
+            const combinedElements = doc.querySelectorAll(`div${filterSelector}`);
             combinedElements.forEach((element) => {
-                const combinedValues = this.configuration.combination.map(attr => element.getAttribute(attr)).filter(Boolean);
-                if (combinedValues.length === this.configuration.combination.length) {
+                const combinedValues = this.configuration.filter.map(attr => element.getAttribute(attr)).filter(Boolean);
+                if (combinedValues.length === this.configuration.filter.length) {
                     // You can decide how to handle the combined values here
-                    this.updateExtractedElements(extractedElements, 'combination', combinedValues.join(', '));
+                    this.updateExtractedElements(extractedElements, 'filter', combinedValues.join(', '));
                 }
             });
         }
-    
+
         return extractedElements;
     }
 

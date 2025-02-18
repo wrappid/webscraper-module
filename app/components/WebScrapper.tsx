@@ -21,17 +21,21 @@ const WebScraper = () => {
   const dispatch = useDispatch();
   const [targetAttributes, setTargetAttributes] = useState({
     attributes: [{ name: 'id', value: '' }],
-    combination: [] // This will hold the combination of attributes
-});
+    filter: [] // This will hold the filter of attributes
+  });
 
   const { url, data: webScrapperData } = useSelector(
     (state: any) => state.webScrapperReducer || {}
   );
   console.log("Received url from state: ", url);
 
-  const handleTargetAttributesChange = (newValue:any) => {
+  const handleTargetAttributesChange = (newValue: any) => {
     setTargetAttributes(newValue);
   };
+
+  const resetWebScraper = () => {
+    dispatch(resetScraper());
+  }
 
   useEffect(() => {
     if (url) {
@@ -44,7 +48,7 @@ const WebScraper = () => {
     if (webScrapperData?.rawData) {
       const scraperConfig: ScraperConfiguration = {
         attributes: targetAttributes.attributes, // This should be an array of TargetAttribute
-        combination: targetAttributes.combination // This should be an array of strings
+        filter: targetAttributes.filter // This should be an array of strings
       };
       dispatch(processData(webScrapperData.rawData, scraperConfig) as any);
     }
@@ -53,25 +57,28 @@ const WebScraper = () => {
   return (
     <>
       <CoreLayoutItem id={AppContainerLayout.PLACEHOLDER.CONTENT}>
+        <CoreButton
+          label="Reset Reducer"
+          onClick={resetWebScraper}
+        />
         <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_COLUMN]}>
           <SearchBar />
           {webScrapperData && (
-            
+
             <CoreGrid>
-              
               <CoreBox gridProps={{ gridSize: { md: 9 } }} styleClasses={[CoreClasses.PADDING.P2]}>
-              <CoreJSONEditor
-                value={targetAttributes}
-                label="Target Attributes (JSON array)"
-                onChange={handleTargetAttributesChange}
-              />
-              <CoreButton 
-                onClick={handleProcessData}
-                styleClasses={[CoreClasses.MARGIN.MT2]}
-              >
-                Process Data
-              </CoreButton>
-                </CoreBox>
+                <CoreJSONEditor
+                  value={targetAttributes}
+                  label="Target Attributes (JSON array)"
+                  onChange={handleTargetAttributesChange}
+                />
+                <CoreButton
+                  onClick={handleProcessData}
+                  styleClasses={[CoreClasses.MARGIN.MT2]}
+                >
+                  Process Data
+                </CoreButton>
+              </CoreBox>
               <CoreBox
                 gridProps={{ gridSize: { md: 6 } }}
                 styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
