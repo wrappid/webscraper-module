@@ -1,18 +1,45 @@
 // types/webscraper.types.ts
-export interface ScrapedElement {
-  attributeName: string;
-  attributeValue: string;
-  occurrenceCount: number;
+
+export interface WhereCondition {
+  equals?: string; // For equality checks
+  notEquals?: string; // For inequality checks
 }
 
 export interface TargetAttribute {
   name: string; // The name of the attribute (e.g., "id", "class")
-  value?: string; // The value of the attribute (optional)
+  value?: string; // The value of the attribute (optional, used for filtering)
 }
 
 export interface ScraperConfiguration {
-  attributes: TargetAttribute[]; // Array of target attributes
-  filter?: string[]; // Array of attribute names to combine
+  attributes: TargetAttribute[]; // Array of target attributes to extract
+  whereConditions?: { [key: string]: WhereCondition }; // Object representing attribute names and their conditions
+  from?: string; // The selector for the elements to scrape (e.g., "div", "*")
+}
+
+/**
+ * Processes the HTML response and extracts elements based on the configuration.
+ * @param {string} htmlData - The HTML data to be processed.
+ * @returns {ScrapedElement[]} An array of extracted elements.
+ */
+export interface Scraper {
+  processHtmlResponse(htmlData: string): ScrapedElement[];
+
+}
+
+export interface ScraperQuery {
+
+  select: string[]; // Array of attributes to select, can include "*"
+
+  from: string; // Selector for the elements to scrape, can include "*"
+
+  where?: { [key: string]: WhereCondition }; // Object representing attribute names and their conditions
+
+}
+
+export interface ScrapedElement {
+  attributeName: string;
+  attributeValue: string;
+  occurrenceCount: number;
 }
 
 export interface WebScraperState {
@@ -34,8 +61,6 @@ export const SAVE_FETCH_FAILURE = "SAVE_FETCH_FAILURE";
 export const SET_SCRAPER_URL = "SET_SCRAPER_URL";
 export const RESET_SCRAPER = "RESET_SCRAPER";
 export const PROCESS_DATA_SUCCESS = "PROCESS_DATA_SUCCESS";
-
-
 
 // export interface ScraperConfiguration {
 //   targetAttributes: string[];

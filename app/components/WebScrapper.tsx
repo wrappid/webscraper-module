@@ -14,14 +14,14 @@ import SearchBar from "./SearchBar";
 import SmartView from "./SmartView";
 import RawView from "./RawView";
 import { fetchScraperData, processData, resetScraper } from "../actions/webScrapperAction";
-import { ScraperConfiguration } from "../types/webscraper.types";
-// import { WebScraperState } from "../types/webscraper.types";
+import { ScraperQuery } from "../types/webscraper.types"; // Import the new ScraperQuery type
 
 const WebScraper = () => {
   const dispatch = useDispatch();
-  const [targetAttributes, setTargetAttributes] = useState({
-    attributes: [{ name: 'id', value: '' }],
-    filter: [] // This will hold the filter of attributes
+  const [query, setQuery] = useState<ScraperQuery>({
+    select: ["id"], // Default selection
+    from: "*", // Default element type
+    where: { class: { equals: "someClass" } } // Default conditions
   });
 
   const { url, data: webScrapperData } = useSelector(
@@ -29,8 +29,8 @@ const WebScraper = () => {
   );
   console.log("Received url from state: ", url);
 
-  const handleTargetAttributesChange = (newValue: any) => {
-    setTargetAttributes(newValue);
+  const handleQueryChange = (newValue: any) => {
+    setQuery(newValue);
   };
 
   const resetWebScraper = () => {
@@ -46,10 +46,26 @@ const WebScraper = () => {
 
   const handleProcessData = () => {
     if (webScrapperData?.rawData) {
-      const scraperConfig: ScraperConfiguration = {
-        attributes: targetAttributes.attributes, // This should be an array of TargetAttribute
-        filter: targetAttributes.filter // This should be an array of strings
+      // Construct the scraper configuration based on the query
+      const scraperConfig = {
+        attributes: query.select.includes('*') 
+          ? [{ name: 'all' }] // Indicate that we want all attributes
+          : query.select.map(attr => ({ name: attr })), // Convert select to TargetAttribute format
+        whereConditions: Object.entries(query.where).reduce((acc, [key, value]) => {
+          // Check if the value is a string or an object
+          if (typeof value === 'string') {
+            acc[key] = { equals: value }; // Treat as equals
+          } else {
+            acc[key] = value; // Keep the existing structure
+          }
+          return acc;
+        }, {}), // Use the where conditions directly
+        from: query.from // Pass the from selector
       };
+
+      console.log("Final Scraper Configuration:", scraperConfig);
+
+      // Dispatch the processData action with the modified configuration
       dispatch(processData(webScrapperData.rawData, scraperConfig) as any);
     }
   };
@@ -64,13 +80,12 @@ const WebScraper = () => {
         <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_COLUMN]}>
           <SearchBar />
           {webScrapperData && (
-
             <CoreGrid>
               <CoreBox gridProps={{ gridSize: { md: 9 } }} styleClasses={[CoreClasses.PADDING.P2]}>
                 <CoreJSONEditor
-                  value={targetAttributes}
-                  label="Target Attributes (JSON array)"
-                  onChange={handleTargetAttributesChange}
+                  value={query}
+                  label="Selector Query (JSON format)"
+                  onChange={handleQueryChange}
                 />
                 <CoreButton
                   onClick={handleProcessData}
