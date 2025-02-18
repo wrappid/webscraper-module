@@ -5,22 +5,15 @@ export interface ScrapedElement {
   occurrenceCount: number;
 }
 
-export interface ScraperConfiguration {
-  targetAttributes: string[];
+export interface TargetAttribute {
+  name: string; // The name of the attribute (e.g., "id", "class")
+  value?: string; // The value of the attribute (optional)
 }
 
-// export interface ScraperResult {
-//   rawData: string;
-//   processedData: ScrapedElement[];
-// }
-
-// export interface WebScraperState {
-//   error: boolean;
-//   message: string;
-//   success: boolean;
-//   data: ScraperResult | null;
-//   url: string;
-// }
+export interface ScraperConfiguration {
+  attributes: TargetAttribute[]; // Array of target attributes
+  combination?: string[]; // Array of attribute names to combine
+}
 
 export interface WebScraperState {
   error: boolean;
@@ -44,9 +37,9 @@ export const PROCESS_DATA_SUCCESS = "PROCESS_DATA_SUCCESS";
 
 
 
-export interface ScraperConfiguration {
-  targetAttributes: string[];
-}
+// export interface ScraperConfiguration {
+//   targetAttributes: string[];
+// }
 
 // Action Type Interfaces
 interface SetScraperUrlAction {

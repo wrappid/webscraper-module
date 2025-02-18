@@ -14,11 +14,15 @@ import SearchBar from "./SearchBar";
 import SmartView from "./SmartView";
 import RawView from "./RawView";
 import { fetchScraperData, processData, resetScraper } from "../actions/webScrapperAction";
+import { ScraperConfiguration } from "../types/webscraper.types";
 // import { WebScraperState } from "../types/webscraper.types";
 
 const WebScraper = () => {
   const dispatch = useDispatch();
-  const [targetAttributes, setTargetAttributes] = useState(['id']);
+  const [targetAttributes, setTargetAttributes] = useState({
+    attributes: [{ name: 'id', value: '' }],
+    combination: [] // This will hold the combination of attributes
+});
 
   const { url, data: webScrapperData } = useSelector(
     (state: any) => state.webScrapperReducer || {}
@@ -38,7 +42,11 @@ const WebScraper = () => {
 
   const handleProcessData = () => {
     if (webScrapperData?.rawData) {
-      dispatch(processData(webScrapperData.rawData, { targetAttributes }) as any);
+      const scraperConfig: ScraperConfiguration = {
+        attributes: targetAttributes.attributes, // This should be an array of TargetAttribute
+        combination: targetAttributes.combination // This should be an array of strings
+      };
+      dispatch(processData(webScrapperData.rawData, scraperConfig) as any);
     }
   };
 
