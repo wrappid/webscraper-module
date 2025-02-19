@@ -21,54 +21,70 @@ export class DOMScraper implements Scraper {
      * @returns {ScrapedElement[]} An array of extracted elements.
      */
     public processHtmlResponse(htmlData: string): ScrapedElement[] {
-        const doc = this.parser.parseFromString(htmlData, "text/html"); // Parse the HTML data into a document
-        const extractedElements: ScrapedElement[] = []; // Array to hold extracted elements
-
-        // Select elements based on the 'from' clause in the configuration
+        const doc = this.parser.parseFromString(htmlData, "text/html");
+        const extractedElements: ScrapedElement[] = [];
+    
         const elements = doc.querySelectorAll(this.configuration.from || '*');
-
-        // Iterate over each selected element
+    
         elements.forEach(element => {
-            let match = true; // Flag to track if the element matches the conditions
-
-            // Check conditions in the 'where' clause
+            let match = true;
+    
+            // Apply where conditions (if any)
             if (this.configuration.whereConditions) {
                 for (const [filterAttr, condition] of Object.entries(this.configuration.whereConditions)) {
-                    const attrValue = element.getAttribute(filterAttr); // Get the attribute value of the current element
-                    // Check if the attribute value matches the equals condition
+                    const attrValue = element.getAttribute(filterAttr);
                     if (condition.equals !== undefined && attrValue !== condition.equals) {
-                        match = false; // If the attribute value doesn't match the equals condition
-                        break; // Exit the loop if a condition fails
+                        match = false;
+                        break;
                     }
-                    // Check if the attribute value matches the notEquals condition
                     if (condition.notEquals !== undefined && attrValue === condition.notEquals) {
-                        match = false; // If the attribute value matches the notEquals condition
-                        break; // Exit the loop if a condition fails
+                        match = false;
+                        break;
                     }
                 }
             }
-
-            // If the element matches the conditions, collect the selected attributes
+    
+            // If the element matches the conditions, extract its attributes
             if (match) {
                 this.configuration.attributes.forEach(attr => {
-                    // Handle wildcard selection
+                    // Handle extracting all attributes if 'all' or '*' is specified
                     if (attr.name === 'all' || attr.name === '*') {
-                        // If selecting all attributes, collect all attributes of the element
                         Array.from(element.attributes).forEach(attrNode => {
-                            this.updateExtractedElements(extractedElements, attrNode.name, attrNode.value); // Update the extracted elements
+                            // Pass the tag name along with the attribute
+                            this.updateExtractedElements(extractedElements, attrNode.name, attrNode.value, element.tagName);
                         });
                     } else {
-                        const extractedValue = element.getAttribute(attr.name); // Get the value of the specified attribute
+                        // Extract a specific attribute
+                        const extractedValue = element.getAttribute(attr.name);
                         if (extractedValue) {
-                            this.updateExtractedElements(extractedElements, attr.name, extractedValue); // Update the extracted elements
+                            // Pass the tag name along with the attribute
+                            this.updateExtractedElements(extractedElements, attr.name, extractedValue, element.tagName);
                         }
                     }
                 });
             }
         });
-
-        return extractedElements; // Return the array of extracted elements
+    
+        return extractedElements;
     }
+    
+    private updateExtractedElements(extractedElements: ScrapedElement[], attributeName: string, attributeValue: string, htmlTag: string) {
+        const existingElement = extractedElements.find(el => el.attributeName === attributeName && el.attributeValue === attributeValue && el.htmlTag === htmlTag);
+    
+        if (existingElement) {
+            existingElement.occurrenceCount++;
+        } else {
+            extractedElements.push({
+                attributeName,
+                attributeValue,
+                occurrenceCount: 1,
+                htmlTag, // Store the HTML tag along with the attribute details
+            });
+        }
+    }
+    
+    
+    
 
     /**
      * Updates the extracted elements array with the new attribute value.
@@ -76,27 +92,30 @@ export class DOMScraper implements Scraper {
      * @param {string} attributeName - The name of the attribute to update.
      * @param {string} value - The value of the attribute to update.
      */
-    private updateExtractedElements(
-        extractedElements: ScrapedElement[],
-        attributeName: string,
-        value: string
-    ): void {
-        // Check if the element already exists in the extracted elements array
-        const existingElement = extractedElements.find(
-            element => element.attributeValue === value && element.attributeName === attributeName
-        );
-
-        if (existingElement) {
-            existingElement.occurrenceCount++; // Increment occurrence count if the element already exists
-        } else {
-            // Add new element with occurrence count of 1
-            extractedElements.push({
-                attributeName,
-                attributeValue: value,
-                occurrenceCount: 1
-            });
-        }
-    }
+    // private updateExtractedElements(
+    //     extractedElements: ScrapedElement[],
+    //     attributeName: string,
+    //     value: string,
+    //     htmlTag: string // Add htmlTag as a parameter
+    // ): void {
+    //     // Check if the element already exists in the extracted elements array
+    //     const existingElement = extractedElements.find(
+    //         element => element.attributeValue === value && element.attributeName === attributeName && element.htmlTag === htmlTag
+    //     );
+    
+    //     if (existingElement) {
+    //         existingElement.occurrenceCount++; // Increment occurrence count if the element already exists
+    //     } else {
+    //         // Add new element with occurrence count of 1
+    //         extractedElements.push({
+    //             attributeName,
+    //             attributeValue: value,
+    //             occurrenceCount: 1,
+    //             htmlTag // Store the HTML tag
+    //         });
+    //     }
+    // }
+    
 }
 
 

@@ -40,7 +40,9 @@ export interface ScrapedElement {
   attributeName: string;
   attributeValue: string;
   occurrenceCount: number;
+  htmlTag: string; // Add this line to store the HTML tag
 }
+
 
 export interface WebScraperState {
   error: boolean;
