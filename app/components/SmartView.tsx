@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  CoreBox,
+  CoreH5,
   CoreClasses,
   CoreTypographyBody1,
-  CoreH4,
-  CoreStack,
-  CorePaper,
+  CoreTypographyCaption,
+  CoreCardHeader,
+  CoreCardContent,
+  CoreCard,
   CoreAccordion,
   CoreAccordionSummary,
   CoreIcon,
@@ -28,24 +29,27 @@ const SmartView: React.FC<SmartViewProps> = ({ IDs }) => {
   }, {} as Record<string, { attributeValue: string; occurrenceCount: number }[]>);
 
   return (
-    <CoreBox styleClasses={[CoreClasses.WIDTH.W_100, CoreClasses.PADDING.P2]}>
-      <CoreH4>Smart View</CoreH4>
-      <CoreStack component={CorePaper}>
+    <>
+      <CoreCard>
+        <CoreCardHeader 
+          styleClasses={[CoreClasses.PADDING.P1]}
+          title={<CoreH5 paragraph={false} gutterBottom={false}>Smart View</CoreH5>}/>
+        <CoreCardContent styleClasses={[CoreClasses.PADDING.P0]}>
         {Object.entries(groupedByAttributeName).map(([attributeName, values], index) => (
-          <CoreAccordion key={index}>
-            <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="arrow" />}>
-              <CoreTypographyBody1>{attributeName}</CoreTypographyBody1>
+          <CoreAccordion key={index} disableGutters={true}>
+            <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="expand_more" />} styleClasses={[CoreClasses.PADDING.PX1]}>
+              <CoreTypographyBody1 gutterBottom={false} paragraph={false}>{attributeName}</CoreTypographyBody1>
             </CoreAccordionSummary>
-            <CoreAccordionDetail>
+            <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
               {values.map((item, idx) => (
-                <CoreAccordion key={idx}>
-                  <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="arrow" />}>
-                    <CoreTypographyBody1>{item.attributeValue} {item.occurrenceCount > 0 && (
-                      <CoreChip label={`${item.occurrenceCount}`} />
+                <CoreAccordion key={idx} disableGutters={true}>
+                  <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="expand_more" />} styleClasses={[CoreClasses.PADDING.PX1, CoreClasses.BG.BG_GREY_100]}>
+                    <CoreTypographyBody1 gutterBottom={false} paragraph={false}>{item.attributeValue} {item.occurrenceCount > 0 && (
+                      <CoreTypographyCaption gutterBottom={false} paragraph={false} styleClasses={[CoreClasses.TEXT.TEXT_WEIGHT_MEDIUM]}>{item.occurrenceCount}</CoreTypographyCaption>
                     )}</CoreTypographyBody1>
                   </CoreAccordionSummary>
-                  <CoreAccordionDetail>
-                    <CoreTypographyBody1>
+                  <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
+                    <CoreTypographyBody1 gutterBottom={false} paragraph={false}>
                       Attribute Value: {item.attributeValue}
                     </CoreTypographyBody1>
                   </CoreAccordionDetail>
@@ -54,8 +58,9 @@ const SmartView: React.FC<SmartViewProps> = ({ IDs }) => {
             </CoreAccordionDetail>
           </CoreAccordion>
         ))}
-      </CoreStack>
-    </CoreBox>
+        </CoreCardContent>
+      </CoreCard>
+    </>
   );
 };
 

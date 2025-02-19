@@ -46,7 +46,6 @@ const SearchBar = () => {
     <CoreGrid>
       <CoreBox 
         gridProps={{ gridSize: { md: 9 } }}
-        styleClasses={[CoreClasses.ALIGNMENT.JUSTIFY_CONTENT_CENTER, CoreClasses.PADDING.P2]}
       >
         <CoreInput
           type="text"
@@ -54,21 +53,12 @@ const SearchBar = () => {
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
           placeholder="Enter URL to scrape..."
-          styleClasses={[
-            CoreClasses.PADDING.P1,
-            CoreClasses.BORDER.BORDER,
-            CoreClasses.BORDER.BORDER_COLOR_GREY_300,
-            CoreClasses.WIDTH.W_75
-          ]}
+          styleClasses={[CoreClasses.BORDER.BORDER, CoreClasses.BORDER.BORDER_COLOR_GREY_300, CoreClasses.MARGIN.MT0, CoreClasses.PADDING.P0_5]}
         />
       </CoreBox>
       <CoreBox
         gridProps={{ gridSize: { md: 3 } }}
-        styleClasses={[
-          CoreClasses.ALIGNMENT.JUSTIFY_CONTENT_CENTER,
-          CoreClasses.PADDING.P2,
-          CoreClasses.TEXT.TEXT_WHITE
-        ]}
+        styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.ALIGNMENT.ALIGN_ITEMS_CENTER, CoreClasses.PADDING.P0_5]}
       >
         <CoreButton onClick={handleSearch}>
           Search

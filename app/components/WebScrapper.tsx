@@ -8,7 +8,10 @@ import {
   CoreClasses,
   CoreGrid,
   CoreJSONEditor,
-  CoreButton
+  CoreButton,
+  CoreIconButton,
+  CoreIcon,
+  CoreTooltip
 } from "@wrappid/core";
 import SearchBar from "./SearchBar";
 import SmartView from "./SmartView";
@@ -73,45 +76,93 @@ const WebScraper = () => {
   return (
     <>
       <CoreLayoutItem id={AppContainerLayout.PLACEHOLDER.CONTENT}>
-        <CoreButton
-          label="Reset Reducer"
-          onClick={resetWebScraper}
-        />
-        <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_COLUMN]}>
-          <SearchBar />
-          {webScrapperData && (
-            <CoreGrid>
-              <CoreBox gridProps={{ gridSize: { md: 9 } }} styleClasses={[CoreClasses.PADDING.P2]}>
-                <CoreJSONEditor
-                  value={query}
-                  label="Selector Query (JSON format)"
-                  onChange={handleQueryChange}
-                />
-                <CoreButton
-                  onClick={handleProcessData}
-                  styleClasses={[CoreClasses.MARGIN.MT2]}
-                >
-                  Process Data
-                </CoreButton>
-              </CoreBox>
-              <CoreBox
-                gridProps={{ gridSize: { md: 6 } }}
-                styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
+        <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.ALIGNMENT.JUSTIFY_CONTENT_FLEX_END]}>
+          <CoreTooltip 
+            title="Reset Reducer"
+            arrow 
+            placement="bottom" 
+            PopperProps={{
+              modifiers: [
+                {
+                  name   : "offset",
+                  options: { offset: [0, -8] }
+                },
+              ],
+            }}
+            styleClasses={[CoreClasses.TEXT.LINEHEIGHT_INITIAL]}
+          >
+          <CoreIconButton
+            onClick={resetWebScraper}
+          >
+            <CoreIcon icon="restart_alt"/>
+          </CoreIconButton>
+          </CoreTooltip>
+        </CoreBox>
+
+        <SearchBar />
+        
+        {webScrapperData && (
+          <>
+            <CoreBox >
+              <CoreJSONEditor
+                value={query}
+                label="Selector Query (JSON format)"
+                onChange={handleQueryChange}
+              />
+              <CoreButton
+                onClick={handleProcessData}
+                styleClasses={[CoreClasses.MARGIN.MT2]}
               >
+                Process Data
+              </CoreButton>
+            </CoreBox>
+
+            <CoreGrid>
+              <CoreBox gridProps={{ gridSize: { md: 6 } }}>
                 <RawView rawData={JSON.stringify(webScrapperData.rawData, null, 2)} />
               </CoreBox>
-
               {webScrapperData?.processedData && (
-                <CoreBox
-                  gridProps={{ gridSize: { md: 6 } }}
-                  styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
-                >
+                <CoreBox gridProps={{ gridSize: { md: 6 } }}>
                   <SmartView IDs={webScrapperData.processedData} />
                 </CoreBox>
               )}
             </CoreGrid>
-          )}
-        </CoreBox>
+          </>
+         )}
+         
+        {/* {webScrapperData && (
+          <CoreGrid>
+            <CoreBox gridProps={{ gridSize: { md: 6 } }}>
+              <CoreJSONEditor
+                value={query}
+                label="Selector Query (JSON format)"
+                onChange={handleQueryChange}
+              />
+              <CoreButton
+                onClick={handleProcessData}
+                styleClasses={[CoreClasses.MARGIN.MT2]}
+              >
+                Process Data
+              </CoreButton>
+            </CoreBox>
+
+            <CoreBox
+              gridProps={{ gridSize: { md: 6 } }}
+              styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
+            >
+              <RawView rawData={JSON.stringify(webScrapperData.rawData, null, 2)} />
+            </CoreBox>
+
+            {webScrapperData?.processedData && (
+              <CoreBox
+                gridProps={{ gridSize: { md: 6 } }}
+                styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
+              >
+                <SmartView IDs={webScrapperData.processedData} />
+              </CoreBox>
+            )}
+          </CoreGrid>
+        )} */}
       </CoreLayoutItem>
     </>
   );
