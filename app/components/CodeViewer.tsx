@@ -38,10 +38,10 @@ const CodeViewer: React.FC<CodeViewerProps> = ({ code }) => {
       const formatted = await prettier.format(processedCode, {
         parser: 'html',
         plugins: [htmlPlugin],
-        printWidth: 80,
+        // printWidth: 80,
         tabWidth: 2,
         useTabs: false,
-        htmlWhitespaceSensitivity: 'ignore',
+        // htmlWhitespaceSensitivity: 'ignore',
       });
       
       setFormattedHtmlCode(formatted);
@@ -61,7 +61,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({ code }) => {
   }, [code]);
 
   return (
-    <CoreBox styleClasses={[CoreClasses.WIDTH.W_100]}>
+    <>
       {error && (
         <CoreBox styleClasses={[CoreClasses.MARGIN.MB2]}>
           <CoreAlert severity="error">
@@ -72,17 +72,25 @@ const CodeViewer: React.FC<CodeViewerProps> = ({ code }) => {
         </CoreBox>
       )}
       <CorePaper>
-        <CoreBox styleClasses={[CoreClasses.HEIGHT.H_100, CoreClasses.OVERFLOW.OVERFLOW_AUTO]}>
+        <CoreBox styleClasses={[CoreClasses.OVERFLOW.OVERFLOW_AUTO, CoreClasses.WIDTH.W_100]}>
           <SyntaxHighlighter 
             language="html"
             showLineNumbers={true}
             wrapLines={true}
+             customStyle={{ 
+              padding: "8px",
+              margin: "0"
+            }}
+            wrapLongLines={true}
+            codeTagProps={{
+              wrapLongLines:true
+            }}
           >
             {formattedHtmlCode || code}
           </SyntaxHighlighter>
         </CoreBox>
       </CorePaper>
-    </CoreBox>
+    </>
   );
 };
 

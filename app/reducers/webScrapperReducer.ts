@@ -15,7 +15,8 @@ const initialState: WebScraperState = {
     error: false,
     message: "Enter a URL to start scraping",
     success: false,
-    loading: false
+    loading: false,
+    processedData: []
 };
 
 const webScrapperReducer = (state = initialState, action: any): WebScraperState => {
@@ -29,11 +30,17 @@ const webScrapperReducer = (state = initialState, action: any): WebScraperState 
                 success: true,
                 message: "Data fetched successfully"
             };
-
         case PROCESS_DATA_SUCCESS:
             return {
                 ...state,
-                data: action.payload,
+                data: {
+                    ...state.data,  // Keep other properties in state.data
+                    processedData: [
+                        // @ts-ignore
+                        ...((state.data.processedData && Array.isArray(state.data.processedData)) ? state.data.processedData : []), // Ensure processedData is an array
+                        ...action.payload.result.processedData // Append the new processedData
+                    ]
+                },
                 loading: false,
                 error: false,
                 success: true,

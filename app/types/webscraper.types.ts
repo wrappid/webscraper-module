@@ -1,5 +1,10 @@
 // types/webscraper.types.ts
 
+export interface ProcessedDataGroup {
+  predefined: ScrapedElement[];
+  custom: ScrapedElement[];
+}
+
 export interface WhereCondition {
   equals?: string; // For equality checks
   notEquals?: string; // For inequality checks
@@ -14,6 +19,7 @@ export interface ScraperConfiguration {
   attributes: TargetAttribute[]; // Array of target attributes to extract
   whereConditions?: { [key: string]: WhereCondition }; // Object representing attribute names and their conditions
   from?: string; // The selector for the elements to scrape (e.g., "div", "*")
+  alias?: string; // An alias for the configuration (e.g., "Links", "Images")
 }
 
 /**
@@ -27,11 +33,8 @@ export interface Scraper {
 }
 
 export interface ScraperQuery {
-
   select: string[]; // Array of attributes to select, can include "*"
-
   from: string; // Selector for the elements to scrape, can include "*"
-
   where?: { [key: string]: WhereCondition }; // Object representing attribute names and their conditions
 
 }
@@ -39,7 +42,8 @@ export interface ScraperQuery {
 export interface ScrapedElement {
   attributeName: string;
   attributeValue: string;
-  occurrenceCount: number;
+  occurrenceCount?: number;
+  alias?: string;
 }
 
 export interface WebScraperState {
@@ -49,7 +53,9 @@ export interface WebScraperState {
   data: ScraperResult | null | {};
   url: string;
   loading: boolean;
+  processedData: [];
 }
+
 
 export interface ScraperResult {
   rawData: string;

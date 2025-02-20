@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  CoreBox,
+  CoreH5,
   CoreClasses,
   CoreTypographyBody1,
-  CoreH4,
-  CoreStack,
-  CorePaper,
+  CoreTypographyCaption,
+  CoreCardHeader,
+  CoreCardContent,
+  CoreCard,
   CoreAccordion,
   CoreAccordionSummary,
   CoreIcon,
@@ -29,34 +30,38 @@ const SmartView: React.FC<SmartViewProps> = ({ extractedData }) => {
   }, {} as Record<string, { attributeValue: string; occurrenceCount: number; alias: string }[]>);
 
   return (
-    <CoreBox styleClasses={[CoreClasses.WIDTH.W_100, CoreClasses.PADDING.P2]}>
-      <CoreH4>Smart View</CoreH4>
-      <CoreStack component={CorePaper}>
-        {Object.entries(groupedByAliasOrAttributeName).map(([groupKey, values], index) => (
-          <CoreAccordion key={index}>
-            <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="arrow" />}>
-              <CoreTypographyBody1>{groupKey}</CoreTypographyBody1>
-            </CoreAccordionSummary>
-            <CoreAccordionDetail>
-              {values.map((item, idx) => (
-                <CoreAccordion key={idx}>
-                  <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="arrow" />}>
-                    <CoreTypographyBody1>{item.attributeValue} {item.occurrenceCount > 0 && (
-                      <CoreChip label={`${item.occurrenceCount}`} />
-                    )}</CoreTypographyBody1>
-                  </CoreAccordionSummary>
-                  <CoreAccordionDetail>
-                    <CoreTypographyBody1>
-                      Attribute Value: {item.attributeValue}
-                    </CoreTypographyBody1>
-                  </CoreAccordionDetail>
-                </CoreAccordion>
-              ))}
-            </CoreAccordionDetail>
-          </CoreAccordion>
-        ))}
-      </CoreStack>
-    </CoreBox>
+    <>
+      <CoreCard>
+        <CoreCardHeader
+          styleClasses={[CoreClasses.PADDING.P1]}
+          title={<CoreH5 paragraph={false} gutterBottom={false}>Smart View</CoreH5>} />
+        <CoreCardContent styleClasses={[CoreClasses.PADDING.P0]}>
+          {Object.entries(groupedByAliasOrAttributeName).map(([attributeName, values], index) => (
+            <CoreAccordion key={index} disableGutters={true}>
+              <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="expand_more" />} styleClasses={[CoreClasses.PADDING.PX1]}>
+                <CoreTypographyBody1 gutterBottom={false} paragraph={false}>{attributeName}</CoreTypographyBody1>
+              </CoreAccordionSummary>
+              <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
+                {values.map((item, idx) => (
+                  <CoreAccordion key={idx} disableGutters={true}>
+                    <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="expand_more" />} styleClasses={[CoreClasses.PADDING.PX1, CoreClasses.BG.BG_GREY_100]}>
+                      <CoreTypographyBody1 gutterBottom={false} paragraph={false}>{item.attributeValue} {item.occurrenceCount > 0 && (
+                        <CoreTypographyCaption gutterBottom={false} paragraph={false} styleClasses={[CoreClasses.TEXT.TEXT_WEIGHT_MEDIUM]}>{item.occurrenceCount}</CoreTypographyCaption>
+                      )}</CoreTypographyBody1>
+                    </CoreAccordionSummary>
+                    <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
+                      <CoreTypographyBody1 gutterBottom={false} paragraph={false}>
+                        Attribute Value: {item.attributeValue}
+                      </CoreTypographyBody1>
+                    </CoreAccordionDetail>
+                  </CoreAccordion>
+                ))}
+              </CoreAccordionDetail>
+            </CoreAccordion>
+          ))}
+        </CoreCardContent>
+      </CoreCard>
+    </>
   );
 };
 

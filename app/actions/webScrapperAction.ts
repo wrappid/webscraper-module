@@ -80,19 +80,28 @@ export const fetchScraperData = (
  * @param {ScraperConfiguration} config - The configuration for the scraper.
  * @returns {function} A thunk function that dispatches actions based on the processing result.
  */
+// actions/webScrapperAction.ts
 export const processData = (contents: string, config: ScraperConfiguration) => {
+
     return (dispatch: Dispatch) => {
+
         try {
-            const scraperService = ScraperService.getInstance(); // Get the instance of ScraperService
-            const result = scraperService.processScrapeData(contents, config); // Process the data
-
-            // Log the processed result
-            console.log("Processed Result:", result);
-
-            dispatch(processDataSuccess(result)); // Dispatch success action with the processed result
+            const scraperService = ScraperService.getInstance();
+            const result = scraperService.processScrapeData(contents, config);
+            // Dispatch success action with the processed result and query key
+            dispatch({
+                type: PROCESS_DATA_SUCCESS,
+                payload: {
+                    // queryKey, // Add the query key here
+                    result, // Ensure this is an array
+                },
+            });
         } catch (error) {
-            console.error("Error processing data:", error); // Log any errors that occur
-            dispatch({ type: SAVE_FETCH_FAILURE, payload: error }); // Dispatch failure action
+            console.error("Error processing data:", error);
+            dispatch({ type: SAVE_FETCH_FAILURE, payload: error });
+
         }
+
     };
+
 };
