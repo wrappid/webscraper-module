@@ -4,19 +4,24 @@ import {
     RESET_SCRAPER,
     SAVE_FETCH_SUCCESS,
     SAVE_FETCH_FAILURE,
-    PROCESS_DATA_SUCCESS,
     WebScraperState,
+    PROCESS_CUSTOM_DATA_SUCCESS,
+    PROCESS_PREDEFINED_DATA_SUCCESS,
     // ScraperConfiguration
 } from '../types/webscraper.types';
 
 const initialState: WebScraperState = {
-    data: {},
+    data: {
+        processedData: {
+            predefined: [],
+            custom: []
+        }
+    },
     url: "",
     error: false,
     message: "Enter a URL to start scraping",
     success: false,
-    loading: false,
-    processedData: []
+    loading: false
 };
 
 const webScrapperReducer = (state = initialState, action: any): WebScraperState => {
@@ -24,28 +29,65 @@ const webScrapperReducer = (state = initialState, action: any): WebScraperState 
         case SAVE_FETCH_SUCCESS:
             return {
                 ...state,
-                data: { ...(state?.data || {}), rawData: action.payload?.contents || "Data not found" },
+                data: {
+                    ...state.data,
+                    rawData: action.payload?.contents || "Data not found",
+                    processedData: {
+                        predefined: [...state.data?.processedData?.predefined || []],
+                        custom: [...state.data?.processedData?.custom || []]
+                    }
+                },
                 loading: false,
                 error: false,
                 success: true,
                 message: "Data fetched successfully"
             };
-        case PROCESS_DATA_SUCCESS:
+
+        case PROCESS_PREDEFINED_DATA_SUCCESS:
             return {
                 ...state,
                 data: {
-                    ...state.data,  // Keep other properties in state.data
-                    processedData: [
-                        // @ts-ignore
-                        ...((state.data.processedData && Array.isArray(state.data.processedData)) ? state.data.processedData : []), // Ensure processedData is an array
-                        ...action.payload.result.processedData // Append the new processedData
-                    ]
-                },
-                loading: false,
-                error: false,
-                success: true,
-                message: "Processed data successfully"
+                    ...state.data,
+                    processedData: {
+                        //@ts-ignore
+                        ...state.data?.processedData,
+                        predefined: [
+                            //@ts-ignore
+                            ...(state.data?.processedData?.predefined || []),
+                            ...action.payload.result.processedData
+                        ]
+                    }
+                }
             };
+
+        case PROCESS_CUSTOM_DATA_SUCCESS:
+            return {
+                ...state,
+                data: {
+                    ...state.data,
+                    processedData: {
+                        //@ts-ignore
+                        ...state.data?.processedData,
+                        custom: action.payload.result.processedData
+                    }
+                }
+            };
+        // case PROCESS_DATA_SUCCESS:
+        //     return {
+        //         ...state,
+        //         data: {
+        //             ...state.data,  // Keep other properties in state.data
+        //             processedData: [
+        //                 // @ts-ignore
+        //                 ...((state.data.processedData && Array.isArray(state.data.processedData)) ? state.data.processedData : []), // Ensure processedData is an array
+        //                 ...action.payload.result.processedData // Append the new processedData
+        //             ]
+        //         },
+        //         loading: false,
+        //         error: false,
+        //         success: true,
+        //         message: "Processed data successfully"
+        //     };
 
         case SAVE_FETCH_FAILURE:
             return {

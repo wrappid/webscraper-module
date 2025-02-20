@@ -1,4 +1,4 @@
-import { AppContainerLayout } from "@wrappid/core"
+import { AppContainerLayout } from "@wrappid/core";
 
 export const RoutesRegistry = {
   WebScrapper: {
