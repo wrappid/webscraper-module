@@ -14,27 +14,28 @@ import {
 } from '@wrappid/core';
 
 interface SmartViewProps {
-  IDs: { attributeName: string; attributeValue: string; occurrenceCount: number }[];
+  extractedData: { attributeName: string; attributeValue: string; occurrenceCount: number, alias: string }[];
 }
 
-const SmartView: React.FC<SmartViewProps> = ({ IDs }) => {
-  // Group the items by attributeName
-  const groupedByAttributeName = IDs.reduce((acc, item) => {
-    if (!acc[item.attributeName]) {
-      acc[item.attributeName] = [];
+const SmartView: React.FC<SmartViewProps> = ({ extractedData }) => {
+  // Group the items by alias if available, otherwise by attributeName
+  const groupedByAliasOrAttributeName = extractedData.reduce((acc, item) => {
+    const groupKey = item.alias && item.alias.trim() !== '' ? item.alias : item.attributeName;
+    if (!acc[groupKey]) {
+      acc[groupKey] = [];
     }
-    acc[item.attributeName].push(item);
+    acc[groupKey].push(item);
     return acc;
-  }, {} as Record<string, { attributeValue: string; occurrenceCount: number }[]>);
+  }, {} as Record<string, { attributeValue: string; occurrenceCount: number; alias: string }[]>);
 
   return (
     <CoreBox styleClasses={[CoreClasses.WIDTH.W_100, CoreClasses.PADDING.P2]}>
       <CoreH4>Smart View</CoreH4>
       <CoreStack component={CorePaper}>
-        {Object.entries(groupedByAttributeName).map(([attributeName, values], index) => (
+        {Object.entries(groupedByAliasOrAttributeName).map(([groupKey, values], index) => (
           <CoreAccordion key={index}>
             <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="arrow" />}>
-              <CoreTypographyBody1>{attributeName}</CoreTypographyBody1>
+              <CoreTypographyBody1>{groupKey}</CoreTypographyBody1>
             </CoreAccordionSummary>
             <CoreAccordionDetail>
               {values.map((item, idx) => (
