@@ -31,12 +31,26 @@ export class ScraperService {
             rawData: htmlData,
             processedData
         };
-
-        // this.notifyObservers(result);
+//testing this can be done 
+//const apple=this.deleteTags(htmlData,"a");
+//console.log(apple);
         return result;
     }
 
-    // private notifyObservers(result: ScraperResult): void {
-    //     this.observers.forEach(observer => observer(result));
-    // }
+    public deleteTags(htmlData: string, tagToDelete: string): string {
+        // Parse the HTML string
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlData, "text/html");
+    
+        // Select all the tags that need to be deleted
+        const elementsToDelete = doc.querySelectorAll(tagToDelete);
+    
+        // Remove each selected element
+        elementsToDelete.forEach(element => {
+            element.remove();
+        });
+    
+        // Serialize the updated HTML back to string
+        return doc.documentElement.outerHTML;
+    }	
 }
