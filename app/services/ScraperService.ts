@@ -53,4 +53,28 @@ export class ScraperService {
         // Serialize the updated HTML back to string
         return doc.documentElement.outerHTML;
     }	
+
+    public filterTags(
+        htmlData: string, 
+        tagToFilter: string, 
+        filterCondition: (element: Element) => boolean
+    ): string {
+        // Parse the HTML string
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlData, "text/html");
+    
+        // Select all the tags that match the tagToFilter
+        const elementsToFilter = doc.querySelectorAll(tagToFilter);
+    
+        // Filter elements based on the condition and remove them
+        elementsToFilter.forEach(element => {
+            if (!filterCondition(element)) {
+                element.remove();
+            }
+        });
+    
+        // Serialize the updated HTML back to string
+        return doc.documentElement.outerHTML;
+    }
+    
 }
