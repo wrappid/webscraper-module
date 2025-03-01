@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.2](https://github.com/wrappid/webscraper-module/compare/v0.0.1...v0.0.2) (2025-02-20)
+
+
+### Features
+
+* :sparkles: enhance ui of web scraper page ([93f5f67](https://github.com/wrappid/webscraper-module/commit/93f5f67754d048f56d44e6142b208697c17d0883)), closes [#2](https://github.com/wrappid/webscraper-module/issues/2)
+
+
+### Bug Fixes
+
+* **core:** :bug: removed bugs ([2a919a3](https://github.com/wrappid/webscraper-module/commit/2a919a3d355987e97ae4af364cb843d752219821)), closes [#1](https://github.com/wrappid/webscraper-module/issues/1)
+
 ### [0.0.6](https://https//github.com/wrappid/wrappid-module/compare/v0.0.5...v0.0.6) (2024-07-12)
 
 ### [0.0.5](https://https//github.com/wrappid/wrappid-module/compare/v0.0.4...v0.0.5) (2024-05-03)

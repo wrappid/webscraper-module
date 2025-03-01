@@ -55,12 +55,18 @@ export class DOMScraper implements Scraper {
                     if (attr.name === 'all' || attr.name === '*') {
                         // If selecting all attributes, collect all attributes of the element
                         Array.from(element.attributes).forEach(attrNode => {
-                            this.updateExtractedElements(extractedElements, attrNode.name, attrNode.value); // Update the extracted elements
+                            this.updateExtractedElements(extractedElements, attrNode.name, attrNode.value, this.configuration.alias); // Use alias for grouping
                         });
+                    } else if (attr.name === 'textContent') {
+                        // Extract text content separately
+                        const textContent = element.textContent?.trim();
+                        if (textContent) {
+                            this.updateExtractedElements(extractedElements, 'textContent', textContent, this.configuration.alias); // Use alias for grouping
+                        }
                     } else {
                         const extractedValue = element.getAttribute(attr.name); // Get the value of the specified attribute
                         if (extractedValue) {
-                            this.updateExtractedElements(extractedElements, attr.name, extractedValue); // Update the extracted elements
+                            this.updateExtractedElements(extractedElements, attr.name, extractedValue, this.configuration.alias); // Use alias for grouping
                         }
                     }
                 });
@@ -75,15 +81,17 @@ export class DOMScraper implements Scraper {
      * @param {ScrapedElement[]} extractedElements - The array of extracted elements.
      * @param {string} attributeName - The name of the attribute to update.
      * @param {string} value - The value of the attribute to update.
+     * @param {string} alias - The group name for the attribute.
      */
     private updateExtractedElements(
         extractedElements: ScrapedElement[],
         attributeName: string,
-        value: string
+        value: string,
+        alias: string // New parameter for attribute group
     ): void {
         // Check if the element already exists in the extracted elements array
         const existingElement = extractedElements.find(
-            element => element.attributeValue === value && element.attributeName === attributeName
+            element => element.attributeValue === value && element.attributeName === attributeName && element.alias === alias
         );
 
         if (existingElement) {
@@ -93,25 +101,9 @@ export class DOMScraper implements Scraper {
             extractedElements.push({
                 attributeName,
                 attributeValue: value,
-                occurrenceCount: 1
+                occurrenceCount: 1,
+                alias // Set the attribute group using the alias
             });
         }
     }
 }
-
-
-/**
- * Example implementation of using the ScraperFactory to create a scraper and process HTML data.
- * const scraperConfig: ScraperConfiguration = {
-    attributes: [{ name: "id" }, { name: "class" }], // Specify attributes to extract
-    whereConditions: {
-        "class": "vector-main-menu-landmark", // Condition to match elements with this class
-        "data-role": "menu" // Additional condition for data-role attribute
-    },
-    from: "div" // Specify the element type to scrape, or use "*" for all elements
-};
-
-const scraper = ScraperFactory.createScraper(scraperConfig); // Create a new scraper instance
-const extractedData = scraper.processHtmlResponse(htmlData); // Process the HTML response to extract data
-
-*/

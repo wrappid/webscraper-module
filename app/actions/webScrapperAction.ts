@@ -6,18 +6,26 @@ import {
     SAVE_FETCH_FAILURE,
     SET_SCRAPER_URL,
     RESET_SCRAPER,
-    PROCESS_DATA_SUCCESS,
     ScraperConfiguration,
-} from "../types/webscraper.types"; // Import action types and ScraperConfiguration type
+    PROCESS_PREDEFINED_DATA_SUCCESS,
+    PROCESS_CUSTOM_DATA_SUCCESS,
+    WebScraperActionTypes,
+    ScraperResult,
+    SaveFetchFailureAction,
+    SetScraperUrlAction,
+    ResetScraperAction,
+    ProcessPredefinedDataSuccessAction,
+    ProcessCustomDataSuccessAction,
+} from "../types/webscraper.types"; // Import types and action types
 import { ScraperService } from "../services/ScraperService"; // Import the ScraperService for processing data
 
 /**
  * Action creator to set the scraper URL.
  * @description This function creates an action to set the URL for the scraper.
  * @param {string} url - The URL to be set for the scraper.
- * @returns {object} The action object with type and payload.
+ * @returns {SetScraperUrlAction} The action object with type and payload.
  */
-export const setUrl = (url: string) => ({
+export const setUrl = (url: string): SetScraperUrlAction => ({
     type: SET_SCRAPER_URL,
     payload: url,
 });
@@ -25,21 +33,43 @@ export const setUrl = (url: string) => ({
 /**
  * Action creator to reset the scraper state.
  * @description This function creates an action to reset the state of the scraper.
- * @returns {object} The action object with type for resetting the scraper.
+ * @returns {ResetScraperAction} The action object with type for resetting the scraper.
  */
-export const resetScraper = () => ({
+export const resetScraper = (): ResetScraperAction => ({
     type: RESET_SCRAPER,
 });
 
 /**
- * Action creator for successful data processing.
- * @description This function creates an action to indicate successful processing of data.
- * @param {any} data - The processed data to be stored in the state.
- * @returns {object} The action object with type and payload.
+ * Action creator for successful predefined data processing.
+ * @description This function creates an action to indicate successful processing of predefined data.
+ * @param {ScraperResult} data - The processed data to be stored in the state.
+ * @returns {ProcessPredefinedDataSuccessAction} The action object with type and payload.
  */
-export const processDataSuccess = (data: any) => ({
-    type: PROCESS_DATA_SUCCESS,
-    payload: data,
+export const processPredefinedDataSuccess = (data: ScraperResult): ProcessPredefinedDataSuccessAction => ({
+    type: PROCESS_PREDEFINED_DATA_SUCCESS,
+    payload: { result: data },
+});
+
+/**
+ * Action creator for successful custom data processing.
+ * @description This function creates an action to indicate successful processing of custom data.
+ * @param {ScraperResult} data - The processed data to be stored in the state.
+ * @returns {ProcessCustomDataSuccessAction} The action object with type and payload.
+ */
+export const processCustomDataSuccess = (data: ScraperResult): ProcessCustomDataSuccessAction => ({
+    type: PROCESS_CUSTOM_DATA_SUCCESS,
+    payload: { result: data },
+});
+
+/**
+ * Action creator for fetch failure.
+ * @description This function creates an action to indicate a failure in fetching data.
+ * @param {string | Error} error - The error message or Error object.
+ * @returns {SaveFetchFailureAction} The action object with type and payload.
+ */
+export const saveFetchFailure = (error: string | Error): SaveFetchFailureAction => ({
+    type: SAVE_FETCH_FAILURE,
+    payload: error instanceof Error ? error.message : error,
 });
 
 /**
@@ -53,7 +83,7 @@ export const fetchScraperData = (
     url: string,
     config?: ScraperConfiguration
 ) => {
-    return (dispatch: Dispatch) => {
+    return (dispatch: Dispatch<WebScraperActionTypes>) => {
         try {
             // Dispatch an API request action to fetch data from the URL
             dispatch(
@@ -68,7 +98,7 @@ export const fetchScraperData = (
             );
         } catch (error) {
             console.error("Error in fetchScraperData:", error); // Log any errors that occur
-            dispatch({ type: SAVE_FETCH_FAILURE, payload: error }); // Dispatch failure action
+            dispatch(saveFetchFailure(error as Error)); // Dispatch failure action with proper typing
         }
     };
 };
@@ -78,21 +108,28 @@ export const fetchScraperData = (
  * @description This function processes the raw HTML content using the ScraperService and dispatches the result.
  * @param {string} contents - The raw HTML content to be processed.
  * @param {ScraperConfiguration} config - The configuration for the scraper.
+ * @param {boolean} [isPredefined=false] - Whether this is processing predefined queries.
  * @returns {function} A thunk function that dispatches actions based on the processing result.
  */
-export const processData = (contents: string, config: ScraperConfiguration) => {
-    return (dispatch: Dispatch) => {
+export const processData = (
+    contents: string,
+    config: ScraperConfiguration,
+    isPredefined: boolean = false
+) => {
+    return (dispatch: Dispatch<WebScraperActionTypes>) => {
         try {
-            const scraperService = ScraperService.getInstance(); // Get the instance of ScraperService
-            const result = scraperService.processScrapeData(contents, config); // Process the data
+            const scraperService = ScraperService.getInstance();
+            const result = scraperService.processScrapeData(contents, config);
 
-            // Log the processed result
-            console.log("Processed Result:", result);
-
-            dispatch(processDataSuccess(result)); // Dispatch success action with the processed result
+            // Dispatch the appropriate success action based on whether it's predefined or custom
+            if (isPredefined) {
+                dispatch(processPredefinedDataSuccess(result));
+            } else {
+                dispatch(processCustomDataSuccess(result));
+            }
         } catch (error) {
-            console.error("Error processing data:", error); // Log any errors that occur
-            dispatch({ type: SAVE_FETCH_FAILURE, payload: error }); // Dispatch failure action
+            console.error("Error processing data:", error);
+            dispatch(saveFetchFailure(error as Error));
         }
     };
 };

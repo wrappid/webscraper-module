@@ -16,7 +16,8 @@ import {
 interface CodeViewerProps {
   code: string;
 }
-
+import {htmlTags} from "../types/queries"
+import DialogDesign from "./DialogDesign"
 const CodeViewer: React.FC<CodeViewerProps> = ({ code }) => {
   const [formattedHtmlCode, setFormattedHtmlCode] = useState<string>('');
   const [error, setError] = useState<string>('');

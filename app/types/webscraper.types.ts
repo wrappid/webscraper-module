@@ -1,54 +1,50 @@
 // types/webscraper.types.ts
 
+// Action Types
+export const SAVE_FETCH_SUCCESS = "SAVE_FETCH_SUCCESS";
+export const SAVE_FETCH_FAILURE = "SAVE_FETCH_FAILURE";
+export const SET_SCRAPER_URL = "SET_SCRAPER_URL";
+export const RESET_SCRAPER = "RESET_SCRAPER";
+export const PROCESS_PREDEFINED_DATA_SUCCESS = "PROCESS_PREDEFINED_DATA_SUCCESS";
+export const PROCESS_CUSTOM_DATA_SUCCESS = "PROCESS_CUSTOM_DATA_SUCCESS";
+
+// Basic Types
 export interface WhereCondition {
-  equals?: string; // For equality checks
-  notEquals?: string; // For inequality checks
+  equals?: string;
+  notEquals?: string;
 }
 
 export interface TargetAttribute {
-  name: string; // The name of the attribute (e.g., "id", "class")
-  value?: string; // The value of the attribute (optional, used for filtering)
+  name: string;
+  value?: string;
 }
 
+// Scraper Configuration Types
 export interface ScraperConfiguration {
-  attributes: TargetAttribute[]; // Array of target attributes to extract
-  whereConditions?: { [key: string]: WhereCondition }; // Object representing attribute names and their conditions
-  from?: string; // The selector for the elements to scrape (e.g., "div", "*")
-}
-
-/**
- * Processes the HTML response and extracts elements based on the configuration.
- * @param {string} htmlData - The HTML data to be processed.
- * @returns {ScrapedElement[]} An array of extracted elements.
- */
-export interface Scraper {
-  processHtmlResponse(htmlData: string): ScrapedElement[];
-
+  attributes: TargetAttribute[];
+  whereConditions?: { [key: string]: WhereCondition };
+  from?: string;
+  alias?: string;
 }
 
 export interface ScraperQuery {
-
-  select: string[]; // Array of attributes to select, can include "*"
-
-  from: string; // Selector for the elements to scrape, can include "*"
-
-  where?: { [key: string]: WhereCondition }; // Object representing attribute names and their conditions
-
+  select: string[];
+  from: string;
+  where?: { [key: string]: WhereCondition };
+  alias?: string;
 }
 
+// Scraper Result Types
 export interface ScrapedElement {
   attributeName: string;
   attributeValue: string;
   occurrenceCount: number;
+  alias?: string;
 }
 
-export interface WebScraperState {
-  error: boolean;
-  message: string;
-  success: boolean;
-  data: ScraperResult | null | {};
-  url: string;
-  loading: boolean;
+export interface ProcessedDataGroup {
+  predefined: ScrapedElement[];
+  custom: ScrapedElement[];
 }
 
 export interface ScraperResult {
@@ -56,38 +52,61 @@ export interface ScraperResult {
   processedData: ScrapedElement[];
 }
 
-export const SAVE_FETCH_SUCCESS = "SAVE_FETCH_SUCCESS";
-export const SAVE_FETCH_FAILURE = "SAVE_FETCH_FAILURE";
-export const SET_SCRAPER_URL = "SET_SCRAPER_URL";
-export const RESET_SCRAPER = "RESET_SCRAPER";
-export const PROCESS_DATA_SUCCESS = "PROCESS_DATA_SUCCESS";
+// State Types
+export interface WebScraperState {
+  error: boolean;
+  message: string;
+  success: boolean;
+  data: {
+    rawData?: string;
+    processedData?: ProcessedDataGroup;
+  } | null;
+  url: string;
+  loading: boolean;
+}
 
-// export interface ScraperConfiguration {
-//   targetAttributes: string[];
-// }
+// Scraper Interface
+export interface Scraper {
+  /**
+   * Processes the HTML response and extracts elements based on the configuration.
+   * @param {string} htmlData - The HTML data to be processed.
+   * @returns {ScrapedElement[]} An array of extracted elements.
+   */
+  processHtmlResponse(htmlData: string): ScrapedElement[];
+}
 
-// Action Type Interfaces
-interface SetScraperUrlAction {
+// Action Interfaces
+export interface SetScraperUrlAction {
   type: typeof SET_SCRAPER_URL;
   payload: string;
 }
 
-interface ResetScraperAction {
+export interface ResetScraperAction {
   type: typeof RESET_SCRAPER;
 }
 
-interface SaveFetchSuccessAction {
+export interface SaveFetchSuccessAction {
   type: typeof SAVE_FETCH_SUCCESS;
+  payload: { contents: string };
 }
 
-interface SaveFetchFailureAction {
+export interface SaveFetchFailureAction {
   type: typeof SAVE_FETCH_FAILURE;
-  payload: string;
+  payload: string | Error;
 }
 
-interface ProcessDataSuccessAction {
-  type: typeof PROCESS_DATA_SUCCESS;
-  payload: any;
+export interface ProcessPredefinedDataSuccessAction {
+  type: typeof PROCESS_PREDEFINED_DATA_SUCCESS;
+  payload: {
+    result: ScraperResult;
+  };
+}
+
+export interface ProcessCustomDataSuccessAction {
+  type: typeof PROCESS_CUSTOM_DATA_SUCCESS;
+  payload: {
+    result: ScraperResult;
+  };
 }
 
 export type WebScraperActionTypes =
@@ -95,4 +114,5 @@ export type WebScraperActionTypes =
   | ResetScraperAction
   | SaveFetchSuccessAction
   | SaveFetchFailureAction
-  | ProcessDataSuccessAction;
+  | ProcessPredefinedDataSuccessAction
+  | ProcessCustomDataSuccessAction;

@@ -11,57 +11,108 @@ import {
   CoreAccordionSummary,
   CoreIcon,
   CoreAccordionDetail,
-  CoreChip
+  CoreChip,
+  CoreBox
 } from '@wrappid/core';
+import { ScrapedElement } from '../types/webscraper.types';
 
 interface SmartViewProps {
-  IDs: { attributeName: string; attributeValue: string; occurrenceCount: number }[];
+  predefinedData: ScrapedElement[];
+  customData: ScrapedElement[];
 }
 
-const SmartView: React.FC<SmartViewProps> = ({ IDs }) => {
-  // Group the items by attributeName
-  const groupedByAttributeName = IDs.reduce((acc, item) => {
-    if (!acc[item.attributeName]) {
-      acc[item.attributeName] = [];
-    }
-    acc[item.attributeName].push(item);
-    return acc;
-  }, {} as Record<string, { attributeValue: string; occurrenceCount: number }[]>);
+const SmartView: React.FC<SmartViewProps> = ({ predefinedData, customData }) => {
+  const renderDataGroup = (data: ScrapedElement[], title: string) => {
+    const groupedData = data.reduce((acc, item) => {
+      const groupKey = item.alias && item.alias.trim() !== '' ? item.alias : item.attributeName;
+      if (!acc[groupKey]) {
+        acc[groupKey] = [];
+      }
+      acc[groupKey].push(item);
+      return acc;
+    }, {} as Record<string, ScrapedElement[]>);
+
+    return (
+      <CoreCard>
+        <CoreCardHeader
+          styleClasses={[CoreClasses.PADDING.P1]}
+          title={<CoreH5 paragraph={false} gutterBottom={false}>{title}</CoreH5>} />
+        <CoreCardContent styleClasses={[CoreClasses.PADDING.P0]}>
+          {Object.entries(groupedData).map(([groupName, values], index) => {
+            const totalCount = values.reduce((sum, item) => sum + (item.occurrenceCount || 1), 0);
+            const uniqueCount = values.length;
+
+            return (
+              <CoreAccordion key={index} disableGutters={true}>
+                <CoreAccordionSummary
+                  expandIcon={<CoreIcon color="action" icon="expand_more" />}
+                  styleClasses={[CoreClasses.PADDING.PX1]}
+                >
+                  <CoreBox
+                    styleClasses={[
+                      CoreClasses.DISPLAY.FLEX,
+                      CoreClasses.ALIGNMENT.ALIGN_ITEMS_CENTER
+                    ]}
+                  >
+                    <CoreTypographyBody1
+                      gutterBottom={false}
+                      paragraph={false}
+                      styleClasses={[CoreClasses.MARGIN.MR2]}
+                    >
+                      {groupName}
+                    </CoreTypographyBody1>
+                    <CoreChip
+                      label={`Total: ${totalCount}`}
+                      size="small"
+                      styleClasses={[CoreClasses.MARGIN.MR1]}
+                    />
+                    <CoreChip
+                      label={`Unique: ${uniqueCount}`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  </CoreBox>
+                </CoreAccordionSummary>
+                <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
+                  {values.map((item, idx) => (
+                    <CoreAccordion key={idx} disableGutters={true}>
+                      <CoreAccordionSummary
+                        expandIcon={<CoreIcon color="action" icon="expand_more" />}
+                        styleClasses={[CoreClasses.PADDING.PX1, CoreClasses.BG.BG_GREY_100]}
+                      >
+                        <CoreTypographyBody1 gutterBottom={false} paragraph={false}>
+                          {item.attributeValue}
+                          {item.occurrenceCount > 1 && (
+                            <CoreChip
+                              label={`${item.occurrenceCount}`}
+                              size="small"
+                              styleClasses={[CoreClasses.MARGIN.MR1]}
+                            />
+                          )}
+                        </CoreTypographyBody1>
+                      </CoreAccordionSummary>
+                      <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
+                        <CoreTypographyBody1 gutterBottom={false} paragraph={false}>
+                          Attribute Value: {item.attributeValue}
+                        </CoreTypographyBody1>
+                      </CoreAccordionDetail>
+                    </CoreAccordion>
+                  ))}
+                </CoreAccordionDetail>
+              </CoreAccordion>
+            );
+          })}
+        </CoreCardContent>
+      </CoreCard>
+    );
+  };
 
   return (
     <>
-      <CoreCard>
-        <CoreCardHeader 
-          styleClasses={[CoreClasses.PADDING.P1]}
-          title={<CoreH5 paragraph={false} gutterBottom={false}>Smart View</CoreH5>}/>
-        <CoreCardContent styleClasses={[CoreClasses.PADDING.P0]}>
-        {Object.entries(groupedByAttributeName).map(([attributeName, values], index) => (
-          <CoreAccordion key={index} disableGutters={true}>
-            <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="expand_more" />} styleClasses={[CoreClasses.PADDING.PX1]}>
-              <CoreTypographyBody1 gutterBottom={false} paragraph={false}>{attributeName}</CoreTypographyBody1>
-            </CoreAccordionSummary>
-            <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
-              {values.map((item, idx) => (
-                <CoreAccordion key={idx} disableGutters={true}>
-                  <CoreAccordionSummary expandIcon={<CoreIcon color="action" icon="expand_more" />} styleClasses={[CoreClasses.PADDING.PX1, CoreClasses.BG.BG_GREY_100]}>
-                    <CoreTypographyBody1 gutterBottom={false} paragraph={false}>{item.attributeValue} {item.occurrenceCount > 0 && (
-                      <CoreTypographyCaption gutterBottom={false} paragraph={false} styleClasses={[CoreClasses.TEXT.TEXT_WEIGHT_MEDIUM]}>{item.occurrenceCount}</CoreTypographyCaption>
-                    )}</CoreTypographyBody1>
-                  </CoreAccordionSummary>
-                  <CoreAccordionDetail styleClasses={[CoreClasses.PADDING.P0]}>
-                    <CoreTypographyBody1 gutterBottom={false} paragraph={false}>
-                      Attribute Value: {item.attributeValue}
-                    </CoreTypographyBody1>
-                  </CoreAccordionDetail>
-                </CoreAccordion>
-              ))}
-            </CoreAccordionDetail>
-          </CoreAccordion>
-        ))}
-        </CoreCardContent>
-      </CoreCard>
+      {predefinedData.length > 0 && renderDataGroup(predefinedData, "Predefined Queries")}
+      {customData.length > 0 && renderDataGroup(customData, "Custom Queries")}
     </>
   );
-};
+}
 
 export default SmartView;

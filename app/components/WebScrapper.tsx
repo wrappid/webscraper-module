@@ -11,109 +11,171 @@ import {
   CoreButton,
   CoreIconButton,
   CoreIcon,
-  CoreTooltip
+  CoreTooltip,
+  CoreAlert,
+  CoreTypographyBody1
 } from "@wrappid/core";
 import SearchBar from "./SearchBar";
 import SmartView from "./SmartView";
 import RawView from "./RawView";
 import { fetchScraperData, processData, resetScraper } from "../actions/webScrapperAction";
-import { ScraperQuery } from "../types/webscraper.types"; // Import the new ScraperQuery type
+import { predefinedQueries } from '../types/queries';
+import DialogDesign from "./DialogDesign";
+import {htmlTags} from "../types/queries";
+
+const defaultCustomQuery = [
+  {
+    select: ['*', 'textContent'],
+    from: '*',
+    where: {},
+    alias: ''
+  }
+];
 
 const WebScraper = () => {
   const dispatch = useDispatch();
-  const [query, setQuery] = useState<ScraperQuery>({
-    select: ["id"], // Default selection
-    from: "*", // Default element type
-    where: { class: { equals: "someClass" } } // Default conditions
-  });
+  const [customQuery, setCustomQuery] = useState(defaultCustomQuery);
+  const [emptyJson, setJsonBlank] = useState<string>("");
 
+  const onTransferDone = () => {
+    console.log("hello")
+    };
   const { url, data: webScrapperData } = useSelector(
     (state: any) => state.webScrapperReducer || {}
   );
-  console.log("Received url from state: ", url);
-
-  const handleQueryChange = (newValue: any) => {
-    setQuery(newValue);
-  };
 
   const resetWebScraper = () => {
     dispatch(resetScraper());
-  }
+    setCustomQuery(defaultCustomQuery);
+    setJsonBlank("");
+  };
+
+  // to reset on refresh or page load
+  useEffect(() => {
+    resetWebScraper();
+  }, []);
 
   useEffect(() => {
     if (url) {
-      console.log("I'm in dispatch");
       dispatch(fetchScraperData(url) as any);
     }
   }, [url]);
 
-  const handleProcessData = () => {
+  useEffect(() => {
     if (webScrapperData?.rawData) {
-      // Construct the scraper configuration based on the query
-      const scraperConfig = {
-        attributes: query.select.includes('*') 
-          ? [{ name: 'all' }] // Indicate that we want all attributes
-          : query.select.map(attr => ({ name: attr })), // Convert select to TargetAttribute format
-        whereConditions: Object.entries(query.where).reduce((acc, [key, value]) => {
-          // Check if the value is a string or an object
-          if (typeof value === 'string') {
-            acc[key] = { equals: value }; // Treat as equals
-          } else {
-            acc[key] = value; // Keep the existing structure
-          }
-          return acc;
-        }, {}), // Use the where conditions directly
-        from: query.from // Pass the from selector
-      };
+      // Process predefined queries automatically
+      predefinedQueries.forEach(query => {
+        const attr = query.select.map(attr => ({ name: attr }));
+        const scraperConfig = {
+          attributes: attr,
+          whereConditions: query?.where,
+          from: query?.from,
+          alias: query?.alias
+        };
+        dispatch(processData(webScrapperData.rawData, scraperConfig, true) as any);
+      });
+    }
+  }, [webScrapperData?.rawData]);
 
-      console.log("Final Scraper Configuration:", scraperConfig);
+  const handleCustomQueryChange = (newValue: any) => {
+    try {
+      // Validate if newValue is a proper array of query objects
+      if (!Array.isArray(newValue)) {
+        throw new Error("Query must be an array of objects");
+      }
 
-      // Dispatch the processData action with the modified configuration
-      dispatch(processData(webScrapperData.rawData, scraperConfig) as any);
+      // Validate each query object
+      // newValue.forEach((query, index) => {
+      //   if (!query.select || !Array.isArray(query.select)) {
+      //     throw new Error(`Query ${index + 1}: 'select' must be an array`);
+      //   }
+      //   if (!query.from || typeof query.from !== 'string') {
+      //     throw new Error(`Query ${index + 1}: 'from' must be a string`);
+      //   }
+      //   if (query.where && typeof query.where !== 'object') {
+      //     throw new Error(`Query ${index + 1}: 'where' must be an object`);
+      //   }
+      //   if (query.alias && typeof query.alias !== 'string') {
+      //     throw new Error(`Query ${index + 1}: 'alias' must be a string`);
+      //   }
+      // });
+
+      setCustomQuery(newValue);
+      setJsonBlank("");
+    } catch (error) {
+      setJsonBlank(error instanceof Error ? error.message : "Invalid query format");
     }
   };
 
-  return (
-    <>
+  const handleProcessCustomData = () => {
+    if (webScrapperData?.rawData && customQuery) {
+      if (emptyJson) {
+        return; // Don't process if there are validation errors
+      }
+
+      // Process custom queries
+      customQuery.forEach(query => {
+        const attr = query.select.map(attr => ({ name: attr }));
+        const scraperConfig = {
+          attributes: attr,
+          whereConditions: query?.where,
+          from: query?.from,
+          alias: query?.alias
+        };
+        dispatch(processData(webScrapperData.rawData, scraperConfig, false) as any);
+      });
+    }
+  };
+
+  return (    <>
+    
       <CoreLayoutItem id={AppContainerLayout.PLACEHOLDER.CONTENT}>
+   <DialogDesign    initialItems={htmlTags} onTransferDone={onTransferDone} />
+
         <CoreBox styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.ALIGNMENT.JUSTIFY_CONTENT_FLEX_END]}>
-          <CoreTooltip 
-            title="Reset Reducer"
-            arrow 
-            placement="bottom" 
+          <CoreTooltip
+            title="Reset Scraper"
+            arrow
+            placement="bottom"
             PopperProps={{
               modifiers: [
                 {
-                  name   : "offset",
+                  name: "offset",
                   options: { offset: [0, -8] }
                 },
               ],
             }}
             styleClasses={[CoreClasses.TEXT.LINEHEIGHT_INITIAL]}
           >
-          <CoreIconButton
-            onClick={resetWebScraper}
-          >
-            <CoreIcon icon="restart_alt"/>
-          </CoreIconButton>
+            <CoreIconButton onClick={resetWebScraper}>
+              <CoreIcon icon="restart_alt" />
+            </CoreIconButton>
           </CoreTooltip>
         </CoreBox>
 
         <SearchBar />
-        
+
         {webScrapperData && (
           <>
-            <CoreBox >
+            <CoreBox>
               <CoreJSONEditor
-                value={query}
-                label="Selector Query (JSON format)"
-                onChange={handleQueryChange}
+                value={customQuery}
+                label="Custom Query (JSON format)"
+                onChange={handleCustomQueryChange}
               />
+              {emptyJson && (
+                <CoreBox styleClasses={[CoreClasses.MARGIN.MY2]}>
+                  <CoreAlert severity="error">
+                    <CoreTypographyBody1>{emptyJson}</CoreTypographyBody1>
+                  </CoreAlert>
+                </CoreBox>
+              )}
               <CoreButton
-                onClick={handleProcessData}
+                onClick={handleProcessCustomData}
                 styleClasses={[CoreClasses.MARGIN.MT2]}
+                disabled={!!emptyJson}
               >
-                Process Data
+                Process Custom Query
               </CoreButton>
             </CoreBox>
 
@@ -123,46 +185,15 @@ const WebScraper = () => {
               </CoreBox>
               {webScrapperData?.processedData && (
                 <CoreBox gridProps={{ gridSize: { md: 6 } }}>
-                  <SmartView IDs={webScrapperData.processedData} />
+                  <SmartView
+                    predefinedData={webScrapperData.processedData.predefined || []}
+                    customData={webScrapperData.processedData.custom || []}
+                  />
                 </CoreBox>
               )}
             </CoreGrid>
           </>
-         )}
-         
-        {/* {webScrapperData && (
-          <CoreGrid>
-            <CoreBox gridProps={{ gridSize: { md: 6 } }}>
-              <CoreJSONEditor
-                value={query}
-                label="Selector Query (JSON format)"
-                onChange={handleQueryChange}
-              />
-              <CoreButton
-                onClick={handleProcessData}
-                styleClasses={[CoreClasses.MARGIN.MT2]}
-              >
-                Process Data
-              </CoreButton>
-            </CoreBox>
-
-            <CoreBox
-              gridProps={{ gridSize: { md: 6 } }}
-              styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
-            >
-              <RawView rawData={JSON.stringify(webScrapperData.rawData, null, 2)} />
-            </CoreBox>
-
-            {webScrapperData?.processedData && (
-              <CoreBox
-                gridProps={{ gridSize: { md: 6 } }}
-                styleClasses={[CoreClasses.DISPLAY.FLEX, CoreClasses.FLEX.DIRECTION_ROW]}
-              >
-                <SmartView IDs={webScrapperData.processedData} />
-              </CoreBox>
-            )}
-          </CoreGrid>
-        )} */}
+        )}
       </CoreLayoutItem>
     </>
   );
